@@ -1,9 +1,9 @@
 import streamlit as st
-import fitz # PyMuPDF - ensure this is installable on your host
-# import tempfile
-# import os
+import fitz
+import tempfile
+import os # <-- Must be here
 
-# (Paste your extract_raw_text_from_pdf and format_screenplay_text functions here)
+# (Your extract_raw_text_from_pdf and format_screenplay_text functions here)
 
 # --- STREAMLIT APP ---
 st.title("🎬 PDF Screenplay Converter")
@@ -12,44 +12,26 @@ st.write("Upload your PDF script to convert it into a formatted text file.")
 uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
 if uploaded_file is not None:
-    # 1. Save the uploaded file temporarily
-    # In a real app, you'd save it to a temp file/location for fitz to read
-    # Since fitz requires a file path, we'll use a temp file.
+    # 1. INITIALIZE VARIABLES HERE: This is the fix for the NameError!
+    pdf_path = None
     
     try:
-        # Use a temporary file to allow fitz to read the file contents
+        # 2. Use a temporary file to allow fitz to read the file contents
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
             tmp_file.write(uploaded_file.read())
-            pdf_path = tmp_file.name
+            pdf_path = tmp_file.name # If the script fails before this line, pdf_path is still None
 
         st.info(f"Processing file: **{uploaded_file.name}**")
 
-        # Step 1: Extract Text
-        raw_script_text = extract_raw_text_from_pdf(pdf_path)
+        # (Rest of your processing logic: extract_raw_text_from_pdf, format_screenplay_text, download_button)
+        
+        # ... (rest of the try block) ...
 
-        if raw_script_text:
-            # Step 2: Format Script
-            formatted_script = format_screenplay_text(raw_script_text)
-
-            # Step 3: Offer the result for download
-            st.success("Conversion Complete!")
-            
-            st.download_button(
-                label="📥 Download Formatted Script (.txt)",
-                data=formatted_script,
-                file_name=f"formatted_{uploaded_file.name.replace('.pdf', '.txt')}",
-                mime="text/plain"
-            )
-
-            st.subheader("Formatted Script Preview:")
-            st.code(formatted_script[:5000], language='text') # Show a preview
-
-        else:
-            st.error("Could not extract text from the PDF. Please check the file.")
-            
     except Exception as e:
         st.error(f"An error occurred during processing: {e}")
         
     finally:
-        # Clean up the temporary file
-        os.unlink(pdf_path)
+        # 3. Check if pdf_path was actually set before trying to unlink it
+        # This prevents the NameError: pdf_path is None if the try block failed early.
+        if pdf_path and os.path.exists(pdf_path):
+            os.unlink(pdf_path)
