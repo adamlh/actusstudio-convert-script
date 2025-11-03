@@ -140,9 +140,9 @@ if uploaded_file is not None:
                     mime="text/plain"
                 )
 
-            st.subheader("Formatted Script Preview (First 500 Lines):")
+            st.subheader("Formatted Script Preview (First 2000 Lines):")
             # Show a preview of the first few lines
-            st.code('\n'.join(formatted_script.split('\n')[:500]), language='text')
+            st.code('\n'.join(formatted_script.split('\n')[:2000]), language='text')
 
         else:
             st.error("Could not extract any meaningful text from the PDF. Check if the PDF content is text-based.")
