@@ -54,36 +54,12 @@ def format_screenplay_text(raw_text):
         
         line_upper = line.upper()
 
-        # 1. SCENE HEADING (Slugline) - Standard Format Check
+        # 1. SCENE HEADING (Slugline)
         if line_upper.startswith('INT.') or line_upper.startswith('EXT.'):
             formatted_script.append(f"\n{line_upper}\n")
             is_dialogue_block = False
-
-        # --- NEW LOGIC FOR NARRATIVE/PROSE SCRIPTS ---
-        # 2. NEW PROSE/NARRATIVE SCRIPT STYLE (Character: "Dialogue")
-        elif ':' in line and line.split(':')[0].strip().isalpha():
-            parts = line.split(':', 1)
-            character_name = parts[0].strip().upper()  # Character name is all-caps
-            dialogue = parts[1].strip()
-            
-            # Simple check to distinguish between dialogue and action lines that happen to have a colon
-            # Dialogue usually starts with a quote or a clear sentence
-            if len(character_name) < 30: # Prevent long action lines from being misclassified
-                formatted_script.append(f"{CHARACTER_INDENT}{character_name}\n")
-                
-                # Check for dialogue on the same line and move it to the dialogue indent
-                if dialogue:
-                    # If it starts with quotes, keep the quotes for clarity
-                    if dialogue.startswith('"') and dialogue.endswith('"'):
-                         formatted_script.append(f"{DIALOGUE_INDENT}{dialogue}\n")
-                    else:
-                         formatted_script.append(f"{DIALOGUE_INDENT}{dialogue}\n")
-                
-                is_dialogue_block = True # Now in a dialogue block for multi-line dialogue (not common in this style)
-                continue # Skip remaining checks and process next line
-        # --- END NEW LOGIC ---
-
-        # 3. CHARACTER CUE - Standard Format Check (Existing Logic)
+        
+        # 2. CHARACTER CUE
         elif len(line) < 35 and line_upper == line and line.count('.') < 2 and not line_upper.endswith(('TO', 'OUT', 'END')):
             if '(' in line and ')' in line:
                 # Handle dual names or descriptors in character line
@@ -93,21 +69,21 @@ def format_screenplay_text(raw_text):
                 formatted_script.append(f"{CHARACTER_INDENT}{line}\n")
             is_dialogue_block = True
         
-        # 4. PARENTHETICAL - Standard Format Check (Existing Logic)
+        # 3. PARENTHETICAL
         elif line.startswith('(') and line.endswith(')'):
             formatted_script.append(f"{PARENTHETICAL_INDENT}{line}\n")
             is_dialogue_block = True
             
-        # 5. DIALOGUE - Standard Format Check (Existing Logic)
+        # 4. DIALOGUE
         elif is_dialogue_block:
             formatted_script.append(f"{DIALOGUE_INDENT}{line}\n")
         
-        # 6. TRANSITION - Standard Format Check (Existing Logic)
+        # 5. TRANSITION
         elif line_upper == 'THE END' or line_upper.endswith('TO:') or line_upper.endswith('OUT'):
             formatted_script.append(f"\n{' ' * 60}{line_upper}\n")
             is_dialogue_block = False
             
-        # 7. ACTION (Default fallback) - Standard Format Check (Existing Logic)
+        # 6. ACTION (Default fallback)
         else:
             formatted_script.append(f"{line}\n")
             is_dialogue_block = False
